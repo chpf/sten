@@ -13,20 +13,13 @@ help_message() {
 }
 
 VERBOSE=false
-set_verbose() {
-    VERBOSE=true
-}
 
 while [[ "$#" -gt 0 ]]; do 
     case "${1}" in
-        -h|\?|--help)
-            help_message
-            exit 0
-            ;;
-        -v|--verbose) set_verbose;;
+        -h|\?|--help) help_message; exit 0 ;;
+        -v|--verbose) VERBOSE=true;;
         -d|--directory) TARGET_DIRECTORY="${2}"; shift ;;
         -t|--target) TARGET_LANGUAGE="${2}" ; shift ;;
-        --no-git) USE_GIT=0;;
         *) printf '%s\n' "unknown option, use -h / --help"; exit 1;;
     esac 
     shift
@@ -44,8 +37,6 @@ else
 fi
 
 
-
-
 [ -z "$TARGET_LANGUAGE" ] && TARGET_LANGUAGE=c && 
     if [ $VERBOSE = true ]; then
         echo "$MSG_NO_TEMPLATE" 
@@ -56,24 +47,26 @@ fi
     fi
 
 
-# check for templates
+# check for templates, install if needed
 if [ -d $USERCONFIG/$PROGRAM_NAME/$TARGET_LANGUAGE ]; then
     if [ $VERBOSE = true ]; then
         echo "$MSG_TEMPLATE_FOUND"
     fi
 else 
-    echo "$TARGET_LANGUAGE must be installed, installing to $USERCONFIG/$PROGRAM_NAME/$TARGET_LANGUAGE/"
-    #install
-    if [ -d $USERCONFIG/$PROGRAM_NAME ]; then
-        mkdir 
+    echo "Template $TARGET_LANGUAGE must be installed, installing to $USERCONFIG/$PROGRAM_NAME/$TARGET_LANGUAGE/"
+    $(rm -rf $USERCONFIG/$PROGRAM_NAME)
+    $(git clone https://github.com/chpf/sten $USERCONFIG/$PROGRAM_NAME)
+    if [ -d $USERCONFIG/$PROGRAM_NAME/$TARGET_LANGUAGE ]; then
+        if [ $VERBOSE = true ]; then
+            echo "info: fetches new templates from git"
+        fi
     else 
-      mkdir $USERCONFIG/$PROGRAM_NAME
-}
-
-
+        echo "error: No template found"
+        exit 1
+    fi
 fi
 
-
+# directory must be empty
 if [ -d $TARGET_DIRECTORY ]; then
     if [ "$(ls -A $TARGET_DIRECTORY )" ]; then
         echo "$MSG_NO_EMPTY_DIR"
