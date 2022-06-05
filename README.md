@@ -1,6 +1,6 @@
 # Sten
 
-create simple project templates
+Simple script to instantiate basic templates
 
 # Dependencies
 
